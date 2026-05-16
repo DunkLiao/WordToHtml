@@ -29,5 +29,7 @@ Thumbs.db
 .env.*
 
 # Generated output
-out_html/
-source_word/
+out_html/*
+!out_html/.gitkeep
+source_word/*
+!source_word/.gitkeep
