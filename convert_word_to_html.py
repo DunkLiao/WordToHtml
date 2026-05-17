@@ -58,6 +58,25 @@ def clean_output() -> None:
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def normalize_media_paths(markup: str, page_dir: Path) -> str:
+    page_prefix = page_dir.resolve().as_posix().rstrip("/") + "/"
+
+    def replace_src(match: re.Match[str]) -> str:
+        prefix, raw_src, suffix = match.groups()
+        normalized_src = raw_src.replace("\\", "/")
+
+        if normalized_src.startswith(page_prefix):
+            relative_src = normalized_src[len(page_prefix) :]
+        elif "/media/" in normalized_src:
+            relative_src = "media/" + normalized_src.rsplit("/media/", 1)[1]
+        else:
+            return match.group(0)
+
+        return f"{prefix}{html.escape(relative_src, quote=True)}{suffix}"
+
+    return re.sub(r'(src=["\'])([^"\']+)(["\'])', replace_src, markup)
+
+
 def run_pandoc(source: Path, page_dir: Path, title: str) -> str:
     content_path = page_dir / "_content.html"
     command = [
@@ -76,7 +95,7 @@ def run_pandoc(source: Path, page_dir: Path, title: str) -> str:
     subprocess.run(command, check=True, cwd=ROOT)
     content = content_path.read_text(encoding="utf-8")
     content_path.unlink()
-    return content
+    return normalize_media_paths(content, page_dir)
 
 
 def extract_text(markup: str) -> str:
