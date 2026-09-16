@@ -17,6 +17,16 @@ if errorlevel 1 (
     exit /b 1
 )
 
+python "%~dp0convert_doc_to_docx.py"
+set "EXIT_CODE=%ERRORLEVEL%"
+
+if not "%EXIT_CODE%"=="0" (
+    echo.
+    echo DOC to DOCX conversion failed with exit code %EXIT_CODE%.
+    pause
+    exit /b %EXIT_CODE%
+)
+
 python "%~dp0convert_word_to_html.py"
 set "EXIT_CODE=%ERRORLEVEL%"
 

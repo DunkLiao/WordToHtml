@@ -1,124 +1,114 @@
 # WordToHtml 使用手冊
 
-WordToHtml 可以把 `source_word` 資料夾中的 Word 文件（`.docx`）轉成可用瀏覽器開啟的靜態網頁。轉換完成後，會在 `out_html` 產生一個文件索引頁，使用者可以直接瀏覽所有文件，也可以搜尋標題與內文。
+WordToHtml 會讀取 `source_word` 資料夾內的 Word 文件，將 `.docx` 轉成可瀏覽、可搜尋的 HTML 網站，輸出到 `out_html`。
 
-## 適合用來做什麼
+本工具也支援舊版 Word `.doc` 檔。執行完整轉換時，系統會先把 `.doc` 另存為同資料夾、同檔名的 `.docx`，再進行 HTML 轉換。
 
-- 把多份 Word 教育訓練手冊整理成網頁版。
-- 產生一個可以搜尋所有文件內容的入口頁。
-- 將轉換後的 `out_html` 資料夾提供給其他人離線瀏覽，或放到內部網站上。
+## 系統需求
 
-## 資料夾說明
+- Windows
+- Python 3.10 或更新版本
+- Microsoft Word，可用於將 `.doc` 轉成 `.docx`
+- Pandoc 3.6 或更新版本
 
-| 位置 | 用途 |
-| --- | --- |
-| `source_word` | 放入要轉換的 Word 文件。只會處理副檔名為 `.docx` 的檔案。 |
-| `out_html` | 轉換完成後的網頁輸出位置。每次轉換時會重新產生內容。 |
-| `run_convert.bat` | Windows 使用者建議直接執行這個檔案來轉換。 |
-| `convert_word_to_html.py` | 實際執行轉換的程式，一般使用者通常不需要修改。 |
-
-## 第一次使用前準備
-
-本工具需要先安裝兩個程式：
-
-1. Python 3.10 或更新版本
-2. Pandoc 3.6 或更新版本
-
-安裝完成後，可以用下面方式確認電腦是否已經可以執行：
-
-1. 在此資料夾空白處按住 `Shift`，按滑鼠右鍵，選擇「在終端機中開啟」或「在 PowerShell 中開啟」。
-2. 輸入以下指令：
+請先在 PowerShell 或命令提示字元確認：
 
 ```powershell
 python --version
 pandoc --version
 ```
 
-如果兩個指令都有顯示版本號，代表環境已準備完成。
-
-如果出現「找不到 python」或「找不到 pandoc」，請先安裝對應程式，或請資訊人員協助確認安裝路徑是否已加入系統環境變數。
-
-## 安裝 Python 套件
-
-第一次使用，或換到新電腦使用時，請在此資料夾中執行：
+第一次使用請安裝 Python 套件：
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-這個步驟只需要做一次。之後如果只是新增 Word 文件並重新轉換，通常不需要再執行。
+## 資料夾用途
 
-## 轉換 Word 文件
+| 路徑 | 用途 |
+| --- | --- |
+| `source_word` | 放入要轉換的 `.doc` 或 `.docx` Word 文件。 |
+| `out_html` | 轉換完成後產生 HTML 網站與搜尋索引。 |
+| `convert_doc_to_docx.bat` | 只把 `.doc` 批次轉成 `.docx`。 |
+| `run_convert.bat` | 先轉 `.doc` 為 `.docx`，再把 `.docx` 轉成 HTML。 |
 
-1. 將要轉換的 Word 文件放進 `source_word` 資料夾。
-2. 確認檔案副檔名是 `.docx`。
-3. 雙擊 `run_convert.bat`。
-4. 等待視窗顯示轉換進度。
-5. 看到 `Conversion completed. Open out_html\index.html to browse the result.` 代表轉換完成。
-6. 開啟 `out_html\index.html` 即可瀏覽結果。
+## 完整轉換流程
 
-轉換時會自動處理 `source_word` 裡所有 `.docx` 文件。文件名稱會成為網頁標題，因此建議先把 Word 檔名整理成容易辨識的名稱。
+1. 將 Word 文件放入 `source_word`。
+2. 可同時放入 `.doc` 與 `.docx`。
+3. 執行 `run_convert.bat`。
+4. 等待畫面顯示完成訊息。
+5. 開啟 `out_html\index.html` 瀏覽結果。
 
-## 瀏覽與搜尋結果
+`run_convert.bat` 會先處理所有 `.doc` 檔：
 
-轉換完成後，請開啟：
+- 若同名 `.docx` 尚未存在，會建立新的 `.docx`。
+- 若同名 `.docx` 已存在，會略過，不覆蓋既有檔案。
+- 原始 `.doc` 會保留，不會刪除。
+
+接著系統會轉換 `source_word` 內所有 `.docx`，並產生：
+
+- `out_html\index.html`
+- `out_html\search-index.json`
+- `out_html\pages\...\index.html`
+
+## 只轉 `.doc` 成 `.docx`
+
+如果只想先把舊格式升級成新格式，執行：
 
 ```text
-out_html\index.html
+convert_doc_to_docx.bat
 ```
 
-索引頁會列出所有已轉換文件。上方搜尋框可以搜尋：
+或使用命令列：
 
-- 文件標題
-- 原始 Word 檔名
-- 文件內文
+```powershell
+python .\convert_doc_to_docx.py
+```
 
-點選搜尋結果後會進入該文件的網頁版。文件頁面左上方有「回到索引」連結，可以回到總列表。
+轉換結果會留在 `source_word`，檔名與原 `.doc` 相同，副檔名改為 `.docx`。
 
-## 重新轉換
+## 只重新產生 HTML
 
-如果新增、刪除或修改了 `source_word` 裡的 Word 文件，只要再次雙擊 `run_convert.bat` 即可。
-
-注意：每次重新轉換時，`out_html` 會被重新產生。請不要把手動修改的重要檔案放在 `out_html` 裡，避免下次轉換時被覆蓋。
-
-## 可以分享哪些檔案
-
-如果只是要讓別人瀏覽轉換後的文件，通常只需要分享整個 `out_html` 資料夾。
-
-請保留 `out_html` 裡的完整資料夾結構，不要只複製單一 HTML 檔，否則圖片、樣式或搜尋功能可能無法正常顯示。
-
-## 常見問題
-
-### 雙擊 `run_convert.bat` 後顯示 Python was not found in PATH
-
-代表電腦找不到 Python。請確認 Python 已安裝，並且安裝時有勾選加入 PATH，或請資訊人員協助設定。
-
-### 雙擊 `run_convert.bat` 後顯示 Pandoc was not found in PATH
-
-代表電腦找不到 Pandoc。請確認 Pandoc 已安裝，並且可以在 PowerShell 中執行 `pandoc --version`。
-
-### 顯示 No .docx files found
-
-代表 `source_word` 資料夾中沒有可轉換的 `.docx` 檔案。請確認 Word 文件已放入 `source_word`，且副檔名不是 `.doc`、`.pdf` 或其他格式。
-
-### 開啟網頁後沒有看到最新內容
-
-請重新雙擊 `run_convert.bat` 產生一次新的 `out_html`，再重新開啟 `out_html\index.html`。如果瀏覽器仍顯示舊內容，可以按 `Ctrl + F5` 強制重新整理。
-
-### Word 裡的版面和網頁看起來不完全一樣
-
-這是正常情況。此工具會盡量保留文字、標題、表格、圖片與公式，但 Word 的頁首頁尾、頁碼、部分複雜排版或特殊樣式，轉成網頁後可能會和原始 Word 不完全相同。
-
-## 進階執行方式
-
-熟悉命令列的使用者，也可以不透過 `run_convert.bat`，直接在此資料夾執行：
+若已經確認 `source_word` 內都是 `.docx`，也可以直接執行：
 
 ```powershell
 python .\convert_word_to_html.py
 ```
 
-成功後會產生：
+不過日常使用建議執行 `run_convert.bat`，避免漏掉新放入的 `.doc`。
 
-- `out_html/index.html`：文件索引與搜尋頁
-- `out_html/search-index.json`：搜尋索引資料
-- `out_html/pages/.../index.html`：每份 Word 文件轉換後的網頁
+## 常見問題
+
+### 顯示 Python was not found in PATH
+
+表示系統找不到 Python。請安裝 Python，並確認安裝時有勾選加入 PATH。
+
+### 顯示 Pandoc was not found in PATH
+
+表示系統找不到 Pandoc。請安裝 Pandoc，並確認 `pandoc --version` 可以在命令列執行。
+
+### 顯示 pywin32 is not installed
+
+請執行：
+
+```powershell
+pip install -r requirements.txt
+```
+
+### 顯示 Microsoft Word automation is not available
+
+表示程式無法透過 Windows 自動化控制 Microsoft Word。請確認：
+
+- Microsoft Word 已安裝。
+- Word 可以正常手動開啟。
+- Office 安裝沒有損毀。
+
+### 同名 `.docx` 已存在但想重新轉檔
+
+為了避免覆蓋人工整理過的檔案，工具預設會略過既有 `.docx`。如果要重轉，請先自行刪除同名 `.docx`，再重新執行批次檔。
+
+### 轉換後看不到新內容
+
+請重新執行 `run_convert.bat`，然後在瀏覽器使用 `Ctrl + F5` 強制重新整理 `out_html\index.html`。
