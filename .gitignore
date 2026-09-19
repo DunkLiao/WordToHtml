@@ -11,10 +11,20 @@ ENV/
 
 # Build and tool caches
 .pytest_cache/
+.hypothesis/
 .mypy_cache/
 .ruff_cache/
+.tox/
+.nox/
 .coverage
+.coverage.*
 htmlcov/
+.superpowers/
+
+# Python package build output
+build/
+dist/
+*.egg-info/
 
 # IDE and editor files
 .vscode/
@@ -22,6 +32,7 @@ htmlcov/
 *.swp
 *.swo
 Thumbs.db
+Desktop.ini
 .DS_Store
 
 # Local environment files
