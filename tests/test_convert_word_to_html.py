@@ -62,6 +62,66 @@ def run_javascript(source: str, expression: str) -> object:
 
 
 class GeneratedInterfaceTests(unittest.TestCase):
+    def test_index_accepts_custom_home_title_and_subtitle(self) -> None:
+        markup = converter.index_html("我的文件中心", "快速搜尋文件")
+
+        self.assertIn("<title>我的文件中心</title>", markup)
+        self.assertIn("<h1>我的文件中心</h1>", markup)
+        self.assertIn("<p class=\"index-intro\">快速搜尋文件</p>", markup)
+
+    def test_index_escapes_custom_home_title_and_subtitle(self) -> None:
+        markup = converter.index_html("A < B", '副標 "draft"')
+
+        self.assertIn("<title>A &lt; B</title>", markup)
+        self.assertIn("<h1>A &lt; B</h1>", markup)
+        self.assertIn(
+            '<p class="index-intro">副標 &quot;draft&quot;</p>',
+            markup,
+        )
+
+    def test_empty_home_text_uses_default_values(self) -> None:
+        markup = converter.index_html("", "")
+
+        self.assertIn("<title>Word 文件索引</title>", markup)
+        self.assertIn(
+            "<p class=\"index-intro\">快速搜尋與閱讀轉換完成的操作手冊。</p>",
+            markup,
+        )
+
+    def test_command_line_parser_accepts_home_text(self) -> None:
+        args = converter.parse_args(
+            ["--home-title", "文件中心", "--home-subtitle", "搜尋文件"]
+        )
+
+        self.assertEqual(args.home_title, "文件中心")
+        self.assertEqual(args.home_subtitle, "搜尋文件")
+
+    def test_batch_files_forward_all_arguments(self) -> None:
+        for batch_name in ("convert_doc_to_docx.bat", "run_convert.bat"):
+            batch = (converter.ROOT / batch_name).read_text(encoding="utf-8")
+            self.assertIn('convert_doc_to_docx.py" %*', batch)
+            if batch_name == "run_convert.bat":
+                self.assertIn(
+                    'convert_word_to_html.py" --home-title "%HOME_TITLE%" '
+                    '--home-subtitle "%HOME_SUBTITLE%" %*',
+                    batch,
+                )
+
+    def test_run_batch_prompts_for_home_text_with_defaults(self) -> None:
+        batch = (converter.ROOT / "run_convert.bat").read_text(encoding="utf-8")
+
+        self.assertNotIn("chcp 65001", batch)
+        self.assertIn("echo Enter home title", batch)
+        self.assertIn("echo Enter home subtitle", batch)
+        self.assertTrue(all(ord(character) < 128 for character in batch))
+        self.assertIn('set /p "HOME_TITLE=', batch)
+        self.assertIn('set /p "HOME_SUBTITLE=', batch)
+        self.assertIn(
+            'convert_word_to_html.py" --home-title "%HOME_TITLE%" '
+            '--home-subtitle "%HOME_SUBTITLE%" %*',
+            batch,
+        )
+
     def test_clean_output_preserves_tracked_directory_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

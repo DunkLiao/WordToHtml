@@ -77,6 +77,25 @@ python .\convert_doc_to_docx.py
 python .\convert_word_to_html.py
 ```
 
+### 自訂首頁標題與副標
+
+可在命令列輸入首頁標題與副標；未指定時會使用內建預設文字：
+
+```powershell
+python .\convert_word_to_html.py `
+  --home-title "我的文件中心" `
+  --home-subtitle "快速搜尋與閱讀文件"
+```
+
+執行 `run_convert.bat` 後，批次視窗會依序要求輸入首頁標題與副標；直接按 Enter 會使用預設文字：
+
+```text
+請輸入首頁標題 [Word 文件索引]: 我的文件中心
+請輸入首頁副標 [快速搜尋與閱讀轉換完成的操作手冊。]: 快速搜尋與閱讀文件
+```
+
+`run_convert.bat` 仍會將額外命令列參數轉交給轉換流程。`convert_doc_to_docx.bat` 同樣會轉交所有命令列參數；這個批次檔只執行 DOC→DOCX，首頁參數會在之後執行 HTML 轉換時生效。
+
 不過日常使用建議執行 `run_convert.bat`，避免漏掉新放入的 `.doc`。
 
 ## 常見問題

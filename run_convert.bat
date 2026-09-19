@@ -17,7 +17,15 @@ if errorlevel 1 (
     exit /b 1
 )
 
-python "%~dp0convert_doc_to_docx.py"
+set "HOME_TITLE="
+echo Enter home title (press Enter for default):
+set /p "HOME_TITLE="
+
+set "HOME_SUBTITLE="
+echo Enter home subtitle (press Enter for default):
+set /p "HOME_SUBTITLE="
+
+python "%~dp0convert_doc_to_docx.py" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if not "%EXIT_CODE%"=="0" (
@@ -27,7 +35,7 @@ if not "%EXIT_CODE%"=="0" (
     exit /b %EXIT_CODE%
 )
 
-python "%~dp0convert_word_to_html.py"
+python "%~dp0convert_word_to_html.py" --home-title "%HOME_TITLE%" --home-subtitle "%HOME_SUBTITLE%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if not "%EXIT_CODE%"=="0" (

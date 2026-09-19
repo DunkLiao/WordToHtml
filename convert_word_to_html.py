@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import html
 import json
 import re
@@ -14,6 +15,8 @@ SOURCE_DIR = ROOT / "source_word"
 OUT_DIR = ROOT / "out_html"
 PAGES_DIR = OUT_DIR / "pages"
 ASSETS_DIR = OUT_DIR / "assets"
+DEFAULT_HOME_TITLE = "Word 文件索引"
+DEFAULT_HOME_SUBTITLE = "快速搜尋與閱讀轉換完成的操作手冊。"
 
 
 class TextExtractor(HTMLParser):
@@ -153,21 +156,28 @@ def page_html(title: str, source_name: str, body: str) -> str:
 """
 
 
-def index_html() -> str:
-    return """<!doctype html>
+def index_html(
+    title: str = DEFAULT_HOME_TITLE,
+    subtitle: str = DEFAULT_HOME_SUBTITLE,
+) -> str:
+    title = title or DEFAULT_HOME_TITLE
+    subtitle = subtitle or DEFAULT_HOME_SUBTITLE
+    escaped_title = html.escape(title)
+    escaped_subtitle = html.escape(subtitle)
+    return f"""<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Word 文件索引</title>
+  <title>{escaped_title}</title>
   <link rel="stylesheet" href="assets/site.css">
 </head>
 <body class="index-page">
   <main class="index-shell">
     <header class="index-header">
       <p class="eyebrow">文件知識庫</p>
-      <h1>Word 文件索引</h1>
-      <p class="index-intro">快速搜尋與閱讀轉換完成的操作手冊。</p>
+      <h1>{escaped_title}</h1>
+      <p class="index-intro">{escaped_subtitle}</p>
       <p class="doc-count" id="doc-count">載入中...</p>
     </header>
     <section class="search-panel" aria-label="文件搜尋">
@@ -980,7 +990,25 @@ if (typeof module !== "undefined") {
 """
 
 
-def convert_all() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="將 Word 文件轉換成 HTML 網站")
+    parser.add_argument(
+        "--home-title",
+        default=DEFAULT_HOME_TITLE,
+        help="首頁標題",
+    )
+    parser.add_argument(
+        "--home-subtitle",
+        default=DEFAULT_HOME_SUBTITLE,
+        help="首頁副標",
+    )
+    return parser.parse_args(argv)
+
+
+def convert_all(
+    home_title: str = DEFAULT_HOME_TITLE,
+    home_subtitle: str = DEFAULT_HOME_SUBTITLE,
+) -> None:
     sources = sorted(SOURCE_DIR.glob("*.docx"), key=lambda path: path.name.lower())
     if not sources:
         raise RuntimeError(f"No .docx files found in {SOURCE_DIR}")
@@ -1012,7 +1040,9 @@ def convert_all() -> None:
             }
         )
 
-    (OUT_DIR / "index.html").write_text(index_html(), encoding="utf-8")
+    (OUT_DIR / "index.html").write_text(
+        index_html(home_title, home_subtitle), encoding="utf-8"
+    )
     (ASSETS_DIR / "search-data.js").write_text(
         "window.SEARCH_INDEX = "
         + json.dumps(index, ensure_ascii=False, indent=2)
@@ -1026,5 +1056,11 @@ def convert_all() -> None:
     print(f"Done. Converted {len(index)} documents into {OUT_DIR}")
 
 
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    convert_all(args.home_title, args.home_subtitle)
+    return 0
+
+
 if __name__ == "__main__":
-    convert_all()
+    raise SystemExit(main())

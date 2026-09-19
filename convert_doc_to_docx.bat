@@ -10,7 +10,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-python "%~dp0convert_doc_to_docx.py"
+python "%~dp0convert_doc_to_docx.py" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if not "%EXIT_CODE%"=="0" (
